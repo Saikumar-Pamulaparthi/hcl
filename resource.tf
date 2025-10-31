@@ -1,7 +1,3 @@
-provider "aws" {
-    region = "us-east-1"
-}
-
 resource "aws_vpc" "Myvpc" {
   cidr_block = "10.0.0.0/16"
   tags = {
@@ -114,17 +110,20 @@ resource "aws_security_group" "Sg" {
 }
 
 resource "aws_instance" "Prod-Server" {
-  for_each        = toset(["jenkins", "sonarQube", "Tomcat"])
+  for_each        = toset(["jenkins", "Tomcat-1", "Tomcat-2", "Monitoring"])
   ami             = "ami-0360c520857e3138f"
   instance_type   = "t2.micro"
   key_name        = "New_Jenkins"
   vpc_security_group_ids = [aws_security_group.Sg.id]
   subnet_id = aws_subnet.pub_sub.id
   tags = {
-    Name = "$echo.value"
+    Name = each.key
   }
 }
 resource "aws_s3_bucket" "Prod-bucket" {
   bucket = "Prod_sai_Practice_Bucket"
+  versioning {
+    enabled = true
+  }
   acl = "private"
 }
